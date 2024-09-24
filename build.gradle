@@ -1,0 +1,58 @@
+plugins {
+    id("java")
+}
+
+group = "org.example"
+version = "1.0-SNAPSHOT"
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+
+    testImplementation(platform("org.junit:junit-bom:5.10.0"))
+    testImplementation("org.junit.jupiter:junit-jupiter")
+
+    // Use TestNG framework
+    testImplementation("io.cucumber:cucumber-java:7.6.0")
+    testImplementation("io.cucumber:cucumber-testng:7.6.0")
+    testImplementation("org.testng:testng:7.6.0")
+
+    // Others
+    implementation("com.google.guava:guava:31.0.1-jre")
+    implementation("org.seleniumhq.selenium:selenium-java:4.4.0")
+    implementation("io.github.bonigarcia:webdrivermanager:5.9.2")
+    implementation("org.seleniumhq.selenium:selenium-chrome-driver:4.9.0")
+
+    // AssertJ Core for assertions
+    testImplementation 'org.assertj:assertj-core:3.24.2'
+}
+
+tasks.test {
+    // Use TestNG for unit tests.
+    useTestNG()
+}
+
+// Define a new resolvable configuration
+configurations {
+    resolvableTestImplementation {
+        extendsFrom testImplementation
+        canBeResolved = true
+    }
+}
+// Ensure the 'runCucumber' task is registered after the configuration is defined
+tasks.register('runCucumber', JavaExec) {
+    dependsOn assemble, testClasses
+    main = 'io.cucumber.core.cli.Main'
+    classpath = configurations.resolvableTestImplementation + sourceSets.main.output + sourceSets.test.output
+    args = [
+            '--plugin', 'pretty',
+            '--plugin', 'html:target/cucumber-report.html',
+            '--glue', 'co.system.cucumber.glue',
+            'src/test/resources'
+    ]
+
+    // Set environment variables
+    environment 'QA_ENV', System.getenv("QA_ENV")
+}

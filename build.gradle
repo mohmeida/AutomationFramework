@@ -58,14 +58,3 @@ tasks.register('runCucumber', JavaExec) {
     // Set environment variables
     environment 'QA_ENV', System.getenv("QA_ENV")
 }
-
-// Make sure to create the directories for reports if they don't exist
-tasks.whenTaskAdded { task ->
-    if (task.name == 'runCucumber') {
-        task.doFirst {
-            file('target/cucumber-report.html').parentFile.mkdirs()
-            file('target/cucumber.json').parentFile.mkdirs()
-            file('target/cucumber.xml').parentFile.mkdirs()
-        }
-    }
-}

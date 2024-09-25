@@ -10,6 +10,5 @@ Feature: Login to System
       | password  | portal_password |
     When verifies user was able to successfully login
 
-  @KillBrowser
-  Scenario: Kill Browser
+
 

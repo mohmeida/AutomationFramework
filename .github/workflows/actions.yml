@@ -10,7 +10,7 @@ on:
 
 permissions:
   actions: read
-  contents: read
+  contents: write
   pull-requests: write
   # Add more permissions as needed (e.g., issues, workflows, etc.)
 

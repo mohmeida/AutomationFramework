@@ -1,10 +1,10 @@
 package co.system.cucumber.glue;
 
-import io.cucumber.java.After;
-import io.cucumber.java.Before;
+import io.cucumber.java.Scenario;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.io.FileHandler;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -12,10 +12,11 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.time.Duration;
+import java.util.Date;
 import java.util.Properties;
 
-import org.apache.commons.io.FileUtils;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.edge.EdgeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
@@ -24,6 +25,8 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 public class BaseTest {
 
     protected static WebDriver driver;
+    protected static Scenario currentScenario;
+
 
     @FindBy(css = "[routerlink*='cart']")
     WebElement cartHeader;
@@ -34,24 +37,22 @@ public class BaseTest {
     public BaseTest() {
     }
 
-    public static WebDriver initializeDriver() throws IOException
-
-    {
+    public static WebDriver initializeDriver() throws IOException {
         Properties prop = new Properties();
         FileInputStream fis = new FileInputStream(System.getProperty("user.dir")
-                + "//src//test//resources//"+ System.getenv("QA_ENV") +".properties");
+                + "//src//test//resources//" + System.getenv("QA_ENV") + ".properties");
         prop.load(fis);
 
-        String browserName = System.getProperty("browser")!=null ? System.getProperty("browser") : prop.getProperty("browser");
+        String browserName = System.getProperty("browser") != null ? System.getProperty("browser") : prop.getProperty("browser");
 
         if (browserName.contains("chrome")) {
             WebDriverManager.chromedriver().setup();
             ChromeOptions options = new ChromeOptions();
-			if(browserName.contains("headless")){
-			options.addArguments("headless");
-			}
+            if (browserName.contains("headless")) {
+                options.addArguments("headless");
+            }
             driver = new ChromeDriver(options);
-            driver.manage().window().setSize(new Dimension(1440,900));//full screen
+            driver.manage().window().setSize(new Dimension(1440, 900));//full screen
 
         } else if (browserName.equalsIgnoreCase("firefox")) {
             System.setProperty("webdriver.gecko.driver",
@@ -69,14 +70,13 @@ public class BaseTest {
         return driver;
     }
 
-    public static String resolveData(String key)
-    {
+    public static String resolveData(String key) {
         //read json to string
         Properties prop = new Properties();
         FileInputStream fis;
         try {
             fis = new FileInputStream(System.getProperty("user.dir")
-                    + "//src//test//resources//"+ System.getenv("QA_ENV") +".properties");
+                    + "//src//test//resources//" + System.getenv("QA_ENV") + ".properties");
             prop.load(fis);
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -89,16 +89,38 @@ public class BaseTest {
     }
 
 
-    public String getScreenshot(String testCaseName,WebDriver driver) throws IOException
-    {
-        TakesScreenshot ts = (TakesScreenshot)driver;
-        File source = ts.getScreenshotAs(OutputType.FILE);
-        File file = new File(System.getProperty("user.dir") + "//reports//" + testCaseName + ".png");
-        FileUtils.copyFile(source, file);
-        return System.getProperty("user.dir") + "//reports//" + testCaseName + ".png";
+    // Screenshot capture method
+    public static String takeScreenshot(String testName) {
 
+        File screenshotsDir = new File("./screenshots");
+        if (!screenshotsDir.exists()) {
+            screenshotsDir.mkdirs();
+        }
 
+        // Convert WebDriver object to TakesScreenshot
+        TakesScreenshot screenshotTaker = (TakesScreenshot) driver;
+
+        // Capture the screenshot as a file
+        File srcFile = screenshotTaker.getScreenshotAs(OutputType.FILE);
+
+        // Define a unique name for the screenshot file
+        String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String screenshotName = testName + "_" + timestamp + ".png";
+
+        // Define the path where the screenshot will be saved
+        File destFile = new File("./screenshots/" + screenshotName);
+
+        try {
+            // Save the screenshot to the specified path
+            FileHandler.copy(srcFile, destFile);
+            System.out.println("Screenshot saved: " + destFile.getAbsolutePath());
+        } catch (IOException e) {
+            System.out.println("Failed to save screenshot: " + e.getMessage());
+        }
+
+        return destFile.getAbsolutePath();
     }
+
 
     public void waitForElementToAppear(By findBy) {
 
@@ -118,15 +140,4 @@ public class BaseTest {
         wait.until(ExpectedConditions.urlContains(partialUrl)); // Wait until URL contains the substring
     }
 
-    @Before
-    public void launchApplication() throws IOException
-    {
-        driver = initializeDriver();
-    }
-
-    @After()
-    public void tearDown()
-    {
-        driver.quit();
-    }
 }

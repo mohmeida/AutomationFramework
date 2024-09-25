@@ -2,7 +2,6 @@ package co.system.selenium.page;
 
 import co.system.cucumber.glue.BaseTest;
 import org.assertj.core.api.Assertions;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
@@ -29,7 +28,7 @@ public class LoginPage extends BaseTest {
         getWebDriver().get("https://rahulshettyacademy.com/client");
     }
 
-    public void enterUsernameandPassword(String username, String password) {
+    public void enterUsernameAndPassword(String username, String password) {
         waitForWebElementToAppear(userEmail);
         userEmail.sendKeys(username);
         waitForWebElementToAppear(passWord);

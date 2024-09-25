@@ -44,12 +44,6 @@ jobs:
           # Add your logic here to capture screenshots on test failure
           echo "Capturing screenshots after test failures"
 
-      - name: Upload test results
-        uses: actions/upload-artifact@v3
-        with:
-          name: test-results
-          path: build/reports/tests/test
-
       - name: Upload screenshots (if any)
         if: failure() # Only upload if tests failed
         uses: actions/upload-artifact@v3

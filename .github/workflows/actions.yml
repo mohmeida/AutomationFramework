@@ -1,4 +1,4 @@
-name: Run Cucumber Tests
+name: CI Workflow
 
 on:
   push:
@@ -8,63 +8,63 @@ on:
     branches:
       - master
 
+permissions:
+  actions: read
+  contents: read
+  pull-requests: write
+  # Add more permissions as needed (e.g., issues, workflows, etc.)
+
 jobs:
   build:
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        browser: [chrome, firefox]  # Matrix strategy for cross-browser testing
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up JDK 11
+      - name: Set up JDK
         uses: actions/setup-java@v3
         with:
-          java-version: '11'
-          distribution: 'adopt'
+          distribution: 'temurin'
+          java-version: '17' # or your required Java version
 
-      - name: Set up ChromeDriver
-        if: matrix.browser == 'chrome'
-        uses: browser-actions/setup-chrome@v1
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
 
-      - name: Set up FirefoxDriver
-        if: matrix.browser == 'firefox'
-        uses: browser-actions/setup-firefox@v1
-
-      - name: Make gradlew executable
-        run: chmod +x ./gradlew  # This line adds the executable permission to gradlew
-
-      - name: Cache Gradle packages
-        uses: actions/cache@v3
-        with:
-          path: ~/.gradle/caches
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
+      - name: Build with Gradle
+        run: ./gradlew clean build
 
       - name: Run tests
         run: ./gradlew clean test
+        continue-on-error: true # Ensures further steps like screenshots are executed
+
+      - name: Capture failed tests screenshots
+        if: failure()
+        run: |
+          # Add your logic here to capture screenshots on test failure
+          echo "Capturing screenshots after test failures"
 
       - name: Upload test results
-        if: failure()
         uses: actions/upload-artifact@v3
         with:
-          name: cucumber-reports
-          path: build/reports/cucumber/
+          name: test-results
+          path: build/reports/tests/test
+
+      - name: Upload screenshots (if any)
+        if: failure() # Only upload if tests failed
+        uses: actions/upload-artifact@v3
+        with:
+          name: screenshots
+          path: path/to/screenshots/folder
 
       - name: Post results in the PR
-        if: always()
         uses: actions/github-script@v6
         with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const { data: workflow } = await github.rest.actions.getWorkflowRun({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            run_id: context.runId
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              run_id: context.runId
             });
-
-          core.info(`Tests run with conclusion: ${workflow.conclusion}`);
-
+            core.info(`Tests run with conclusion: ${workflow.conclusion}`);

@@ -10,7 +10,6 @@ repositories {
 }
 
 dependencies {
-
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
 
@@ -41,6 +40,7 @@ configurations {
         canBeResolved = true
     }
 }
+
 // Ensure the 'runCucumber' task is registered after the configuration is defined
 tasks.register('runCucumber', JavaExec) {
     dependsOn assemble, testClasses
@@ -48,11 +48,24 @@ tasks.register('runCucumber', JavaExec) {
     classpath = configurations.resolvableTestImplementation + sourceSets.main.output + sourceSets.test.output
     args = [
             '--plugin', 'pretty',
-            '--plugin', 'html:target/cucumber-report.html',
+            '--plugin', 'html:target/cucumber-report.html',   // HTML report
+            '--plugin', 'json:target/cucumber.json',          // JSON report
+            '--plugin', 'junit:target/cucumber.xml',          // JUnit XML report for CI/CD
             '--glue', 'co.system.cucumber.glue',
             'src/test/resources'
     ]
 
     // Set environment variables
     environment 'QA_ENV', System.getenv("QA_ENV")
+}
+
+// Make sure to create the directories for reports if they don't exist
+tasks.whenTaskAdded { task ->
+    if (task.name == 'runCucumber') {
+        task.doFirst {
+            file('target/cucumber-report.html').parentFile.mkdirs()
+            file('target/cucumber.json').parentFile.mkdirs()
+            file('target/cucumber.xml').parentFile.mkdirs()
+        }
+    }
 }

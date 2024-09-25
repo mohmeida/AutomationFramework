@@ -34,6 +34,9 @@ jobs:
         if: matrix.browser == 'firefox'
         uses: browser-actions/setup-firefox@v1
 
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew  # This line adds the executable permission to gradlew
+
       - name: Cache Gradle packages
         uses: actions/cache@v3
         with:

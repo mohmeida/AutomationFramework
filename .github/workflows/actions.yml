@@ -41,8 +41,6 @@ jobs:
       - name: Capture failed tests screenshots
         if: failure()
         run: |
-          # Add your logic here to capture screenshots on test failure
-          echo "Capturing screenshots after test failures"
 
       - name: Upload screenshots (if any)
         if: failure() # Only upload if tests failed
@@ -56,6 +54,15 @@ jobs:
         with:
            name: cucumber-reports
            path: target/*
+
+     # Step 6: Deploy Cucumber report to GitHub Pages
+      - name: Deploy to GitHub Pages
+        if: success()
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./target
+          publish_branch: gh-pages
 
       - name: Post results in the PR
         uses: actions/github-script@v6

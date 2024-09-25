@@ -4,8 +4,9 @@ import co.system.selenium.page.LoginPage;
 import io.cucumber.java.en.*;
 import java.util.Map;
 
-import static co.system.cucumber.glue.BaseTest.resolveData;
+import static co.system.cucumber.glue.BaseTest.*;
 import static util.RetryUtils.doWithRetry;
+
 
 public class LoginStep {
 
@@ -29,13 +30,16 @@ public class LoginStep {
 
     @Given("User Logins to system with below data:")
     public void userLoginsToSystemWithBelowData(Map<String, String> data)  {
+
+        //use resolveData method to fetch data from properties file
         String email = resolveData(data.get("useremail"));
         String password = resolveData(data.get("password"));
-        Runnable loginToSystem = () -> {
-            loginPage.enterUsernameandPassword(email, password);
-        };
+
+        //Use Runnable interface to run method so it can be used for retry
+        Runnable loginToSystem = () -> loginPage.enterUsernameAndPassword(email, password);
+
         // Call the retry method
-       doWithRetry(loginToSystem, "Enter Username and Password", 3, 2000);
+        doWithRetry(loginToSystem, "Enter Username and Password", 3, 2000);
 
     }
 

@@ -12,7 +12,6 @@ permissions:
   actions: read
   contents: write
   pull-requests: write
-  # Add more permissions as needed (e.g., issues, workflows, etc.)
 
 jobs:
   build:
@@ -26,44 +25,52 @@ jobs:
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
-          java-version: '17' # or your required Java version
+          java-version: '17'
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
+      # Build the project with Gradle
       - name: Build with Gradle
         run: ./gradlew clean build
 
+      # Run the tests with detailed logs
       - name: Run tests
-        run: ./gradlew clean test
-        continue-on-error: true # Ensures further steps like screenshots are executed
+        run: ./gradlew clean test --info  # Adding --info for detailed logs
+        continue-on-error: true  # Continue if tests fail to capture logs and screenshots
 
+      # Capture screenshots if tests fail
       - name: Capture failed tests screenshots
-        if: failure()
+        if: failure()  # Runs only if the previous step (test) fails
         run: |
+          mkdir -p screenshots
+          cp -r C:/Users/lenovo/AquaProjects/AutomationProject/screenshots/* screenshots/
 
+      # Upload the screenshots if there are any
       - name: Upload screenshots (if any)
-        if: failure() # Only upload if tests failed
+        if: failure()  # Uploads only if there was a failure
         uses: actions/upload-artifact@v3
         with:
           name: screenshots
-          path: path/to/screenshots/folder
+          path: screenshots
 
+      # Upload the Cucumber test reports
       - name: Upload Cucumber Reports
         uses: actions/upload-artifact@v3
         with:
            name: cucumber-reports
            path: target/*
 
-     # Step 6: Deploy Cucumber report to GitHub Pages
+      # Deploy Cucumber report to GitHub Pages
       - name: Deploy to GitHub Pages
-        if: success()
+        if: success()  # Runs only if the build and tests were successful
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./target
+          publish_dir: ./target  # Ensure the correct path to the reports folder
           publish_branch: gh-pages
 
+      # Post results in the pull request
       - name: Post results in the PR
         uses: actions/github-script@v6
         with:
@@ -75,3 +82,7 @@ jobs:
               run_id: context.runId
             });
             core.info(`Tests run with conclusion: ${workflow.conclusion}`);
+
+      # Display build logs
+      - name: Show build logs
+        run: cat ${{ github.workspace }}/build/reports/tests/test/index.html

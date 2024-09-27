@@ -24,6 +24,13 @@ dependencies {
     implementation("io.github.bonigarcia:webdrivermanager:5.9.2")
     implementation("org.seleniumhq.selenium:selenium-chrome-driver:4.9.0")
 
+    // Add RestAssured for API testing
+    testImplementation("io.rest-assured:rest-assured:5.3.0")
+
+    // JSON Path and XML Path support
+    testImplementation("io.rest-assured:json-path:5.3.0")
+    testImplementation("io.rest-assured:xml-path:5.3.0")
+
     // AssertJ Core for assertions
     testImplementation 'org.assertj:assertj-core:3.24.2'
 }

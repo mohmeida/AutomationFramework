@@ -1,6 +1,6 @@
 package co.system.selenium.page;
 
-import co.system.cucumber.glue.BaseTest;
+import co.system.cucumber.glue.helpers.BaseTest;
 import org.assertj.core.api.Assertions;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
@@ -10,7 +10,7 @@ public class LoginPage extends BaseTest {
 
     private String dashUrl = "https://rahulshettyacademy.com/client/dashboard/dash";
 
-    @FindBy(xpath = "//input[@id='userEmail']")
+    @FindBy(xpath = "//input[@id='userEmail22']")
     WebElement userEmail;
 
     @FindBy(css = "input[id='userPassword']")
@@ -21,7 +21,7 @@ public class LoginPage extends BaseTest {
 
 
     public LoginPage() {
-        PageFactory.initElements(driver, this);
+        PageFactory.initElements(getWebDriver(), this);
     }
 
     public void goToUrl() {

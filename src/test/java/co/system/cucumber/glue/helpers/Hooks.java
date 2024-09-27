@@ -1,4 +1,4 @@
-package co.system.cucumber.glue;
+package co.system.cucumber.glue.helpers;
 
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
@@ -13,7 +13,7 @@ public class Hooks extends BaseTest {
 
     @Before
     public void beforeScenario(Scenario scenario) throws IOException {
-        driver = initializeDriver();
+        BaseTest.initializeDriver();
         currentScenario = scenario;  // Store the scenario for later use
     }
 
@@ -23,9 +23,7 @@ public class Hooks extends BaseTest {
             byte[] screenshot = takeScreenshot(scenario.getName()).getBytes();
             scenario.attach(screenshot, "image/png", "Failure Screenshot");
         }
-        driver.quit();
+        getWebDriver().quit();
     }
-
-
 
 }

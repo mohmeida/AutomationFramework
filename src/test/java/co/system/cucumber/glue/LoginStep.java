@@ -2,9 +2,11 @@ package co.system.cucumber.glue;
 
 import co.system.selenium.page.LoginPage;
 import io.cucumber.java.en.*;
+import co.system.cucumber.glue.helpers.BaseTest;
+
 import java.util.Map;
 
-import static co.system.cucumber.glue.BaseTest.*;
+import static co.system.cucumber.glue.helpers.BaseTest.resolveData;
 import static util.RetryUtils.doWithRetry;
 
 
@@ -14,7 +16,6 @@ public class LoginStep {
     protected BaseTest baseTest;
 
     public LoginStep() {
-        baseTest = new BaseTest();
         loginPage = new LoginPage();
     }
 

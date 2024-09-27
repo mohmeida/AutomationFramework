@@ -3,7 +3,7 @@ package util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static co.system.cucumber.glue.BaseTest.takeScreenshot;
+import static co.system.cucumber.glue.helpers.BaseTest.takeScreenshot;
 
 public class RetryUtils {
 

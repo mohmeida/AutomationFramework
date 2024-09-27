@@ -1,4 +1,4 @@
-package co.system.cucumber.glue;
+package co.system.cucumber.glue.helpers;
 
 import io.cucumber.java.Scenario;
 import io.github.bonigarcia.wdm.WebDriverManager;
@@ -24,7 +24,7 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 
 public class BaseTest {
 
-    protected static WebDriver driver;
+    public static WebDriver driver;
     protected static Scenario currentScenario;
 
 
@@ -84,7 +84,7 @@ public class BaseTest {
         return prop.getProperty(key);
     }
 
-    public WebDriver getWebDriver() {
+    public static WebDriver getWebDriver() {
         return driver;
     }
 

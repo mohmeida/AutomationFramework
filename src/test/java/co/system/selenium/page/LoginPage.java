@@ -10,7 +10,7 @@ public class LoginPage extends BaseTest {
 
     private String dashUrl = "https://rahulshettyacademy.com/client/dashboard/dash";
 
-    @FindBy(xpath = "//input[@id='userEmail22']")
+    @FindBy(xpath = "//input[@id='userEmail']")
     WebElement userEmail;
 
     @FindBy(css = "input[id='userPassword']")

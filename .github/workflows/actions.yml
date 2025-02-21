@@ -1,4 +1,4 @@
-name: CI Workflow
+name: Regression Workflow
 
 on:
   push:

@@ -1,13 +1,7 @@
-name: CI Workflow
+name: Regression Workflow
 
 on:
-  push:
-    branches:
-      - master
-  pull_request:
-    branches:
-      - master
-  workflow_dispatch:  # ✅ Enables manual trigger button
+  workflow_dispatch:  # ✅ Only runs manually
 
 permissions:
   actions: read
@@ -17,6 +11,9 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+
+    # ✅ Only run this job if the branch is master
+    if: github.ref == 'refs/heads/master'  
 
     steps:
       - name: Checkout code
@@ -75,4 +72,3 @@ jobs:
             const owner = context.repo.owner;
             const url = `https://github.com/${owner}/${repo}/actions/runs/${runId}`;
             console.log(`🔄 Click here to refresh: ${url}`);
-

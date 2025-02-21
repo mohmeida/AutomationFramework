@@ -1,4 +1,4 @@
-name: Regression Workflow
+name: CI Workflow
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
   pull_request:
     branches:
       - master
-  workflow_dispatch:  # ✅ Allows manual execution
+  workflow_dispatch:  # ✅ Enables manual trigger button
 
 permissions:
   actions: read
@@ -37,25 +37,18 @@ jobs:
 
       # Run the tests with detailed logs
       - name: Run tests
-        run: ./gradlew clean test --info  # Adding --info for detailed logs
-        continue-on-error: true  # Continue if tests fail to capture logs and screenshots
+        run: ./gradlew clean test --info
+        continue-on-error: true  
 
-      # Capture screenshots if tests fail
-      - name: Capture failed tests screenshots
-        if: failure()  # Runs only if the previous step (test) fails
-        run: |
-          mkdir -p screenshots
-          cp -r C:/Users/lenovo/AquaProjects/AutomationProject/screenshots/* screenshots/
-
-      # ✅ Updated to v4
+      # Upload screenshots (if tests fail)
       - name: Upload screenshots (if any)
-        if: failure()  # Uploads only if there was a failure
+        if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: screenshots
           path: screenshots
 
-      # ✅ Updated to v4
+      # Upload Cucumber test reports
       - name: Upload Cucumber Reports
         uses: actions/upload-artifact@v4
         with:
@@ -64,26 +57,22 @@ jobs:
 
       # Deploy Cucumber report to GitHub Pages
       - name: Deploy to GitHub Pages
-        if: success()  # Runs only if the build and tests were successful
+        if: success()
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./target  # Ensure the correct path to the reports folder
+          publish_dir: ./target
           publish_branch: gh-pages
 
-      # Post results in the pull request
-      - name: Post results in the PR
+      # Post a refresh link to the PR or Actions page
+      - name: Post Refresh Link
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const { data: workflow } = await github.rest.actions.getWorkflowRun({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              run_id: context.runId
-            });
-            core.info(`Tests run with conclusion: ${workflow.conclusion}`);
+            const runId = context.runId;
+            const repo = context.repo.repo;
+            const owner = context.repo.owner;
+            const url = `https://github.com/${owner}/${repo}/actions/runs/${runId}`;
+            console.log(`🔄 Click here to refresh: ${url}`);
 
-      # Display build logs
-      - name: Show build logs
-        run: cat ${{ github.workspace }}/build/reports/tests/test/index.html

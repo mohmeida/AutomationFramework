@@ -7,7 +7,7 @@ on:
   pull_request:
     branches:
       - master
-  workflow_dispatch:  # ✅ This allows manual execution
+  workflow_dispatch:  # ✅ Allows manual execution
 
 permissions:
   actions: read
@@ -47,17 +47,17 @@ jobs:
           mkdir -p screenshots
           cp -r C:/Users/lenovo/AquaProjects/AutomationProject/screenshots/* screenshots/
 
-      # Upload the screenshots if there are any
+      # ✅ Updated to v4
       - name: Upload screenshots (if any)
         if: failure()  # Uploads only if there was a failure
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: screenshots
           path: screenshots
 
-      # Upload the Cucumber test reports
+      # ✅ Updated to v4
       - name: Upload Cucumber Reports
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
            name: cucumber-reports
            path: target/*

@@ -55,22 +55,17 @@ jobs:
       - name: Debug test failure flag
         run: echo "TESTS_FAILED is set to $TESTS_FAILED"
 
-      - name: Publish Cucumber Report to GitHub Pages
+      - name: Upload Cucumber Report as Artifact
         if: always()
-        run: |
-          mkdir -p cucumber-reports
-          cp target/cucumber-report.html cucumber-reports/index.html
-          git config --global user.email "github-actions@github.com"
-          git config --global user.name "GitHub Actions"
-          git fetch origin gh-pages || git checkout --orphan gh-pages
-          git checkout gh-pages
-          mv cucumber-reports/* .
-          git add index.html
-          git commit -m "Update Cucumber Report"
-          git push origin gh-pages --force
+        uses: actions/upload-artifact@v4
+        with:
+          name: cucumber-report
+          path: target/cucumber-report.html  # ✅ Ensure this path is correct
+          retention-days: 7  # ✅ Keep it for 7 days
 
-      - name: Provide Cucumber Report URL
-        run: echo "Report is available at: https://your-username.github.io/your-repo/"  # ✅ Replace with actual repo URL
+      - name: Provide Direct Cucumber Report Link
+        if: always()
+        run: echo "Cucumber Report: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
       - name: Fail workflow if tests failed
         if: env.TESTS_FAILED == 'true'

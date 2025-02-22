@@ -22,6 +22,7 @@ jobs:
         with:
           fetch-depth: 0  # ✅ Ensure full history is pulled
 
+      # ✅ Debug: Confirm correct branch and latest commit
       - name: Verify branch and latest commit
         run: |
           git branch
@@ -41,19 +42,19 @@ jobs:
         run: rm -rf ~/.gradle/caches
 
       - name: Build with Gradle
-        run: ./gradlew clean build --no-daemon --rerun-tasks
+        run: ./gradlew clean build --no-daemon
 
       - name: Run tests (Capture failure)
         run: |
-          ./gradlew clean test --info --fail-fast --no-build-cache --rerun-tasks || echo "TESTS_FAILED=true" >> $GITHUB_ENV
+          ./gradlew clean test --info || echo "TESTS_FAILED=true" >> $GITHUB_ENV
 
-      - name: Debug: List report files
-        run: ls -R target/ || echo "No reports found"
-
-      - name: Upload Cucumber Reports
+      - name: Upload Cucumber Reports (Always run)
         if: always()
         uses: actions/upload-artifact@v4
         with:
-           name: cucumber-report
-           path: target/cucumber-report.html  # ✅ Match the local path
-           if-no-files-found: warn  # ✅ Prevents failure if the file is missing
+           name: cucumber-reports
+           path: target/*
+
+      - name: Fail workflow if tests failed
+        if: env.TESTS_FAILED == 'true'
+        run: exit 1

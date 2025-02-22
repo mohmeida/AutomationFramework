@@ -37,7 +37,7 @@ jobs:
       # Run the tests with detailed logs
       - name: Run tests
         run: ./gradlew clean test --info
-        continue-on-error: true  
+        continue-on-error: false  
 
       # Upload screenshots (if tests fail)
       - name: Upload screenshots (if any)

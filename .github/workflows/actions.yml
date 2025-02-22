@@ -55,17 +55,17 @@ jobs:
       - name: Debug test failure flag
         run: echo "TESTS_FAILED is set to $TESTS_FAILED"
 
-      - name: Upload Cucumber Report as Artifact
+      # ✅ Upload the Cucumber HTML Report
+      - name: Upload Cucumber Reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: cucumber-report
           path: target/cucumber-report.html  # ✅ Ensure this path is correct
-          retention-days: 7  # ✅ Keep it for 7 days
 
-      - name: Provide Direct Cucumber Report Link
-        if: always()
-        run: echo "Cucumber Report: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+      # ✅ Provide direct artifact link to open in browser
+      - name: Show Cucumber Report Link
+        run: echo "Cucumber Report: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts"
 
       - name: Fail workflow if tests failed
         if: env.TESTS_FAILED == 'true'

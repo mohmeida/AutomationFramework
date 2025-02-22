@@ -17,8 +17,17 @@ jobs:
     if: github.ref == 'refs/heads/master'  
 
     steps:
-      - name: Checkout code
+      - name: Checkout code (Ensure latest commit)
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # ✅ Ensure full history is pulled
+
+      # ✅ Debug: Confirm correct branch and latest commit
+      - name: Verify branch and latest commit
+        run: |
+          git branch
+          git log -1
+          git status
 
       - name: Set up JDK
         uses: actions/setup-java@v3
@@ -29,52 +38,23 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Cache Gradle packages
-        uses: actions/cache@v3
-        with:
-          path: ~/.gradle/caches
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
+      - name: Clear Gradle Cache (Prevent stale builds)
+        run: rm -rf ~/.gradle/caches
 
       - name: Build with Gradle
         run: ./gradlew clean build --no-daemon
 
-      # ✅ Run tests but capture exit status
-      - name: Run tests
+      - name: Run tests (Capture failure)
         run: |
           ./gradlew clean test --info || echo "TESTS_FAILED=true" >> $GITHUB_ENV
 
-      # ✅ Always generate and upload Cucumber reports (even if tests fail)
-      - name: Upload Cucumber Reports
+      - name: Upload Cucumber Reports (Always run)
         if: always()
         uses: actions/upload-artifact@v4
         with:
            name: cucumber-reports
            path: target/*
 
-      # ✅ Manually fail workflow if tests failed
       - name: Fail workflow if tests failed
         if: env.TESTS_FAILED == 'true'
         run: exit 1
-
-      # ✅ Deploy Cucumber report to GitHub Pages (only if build succeeds)
-      - name: Deploy to GitHub Pages
-        if: success()
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./target
-          publish_branch: gh-pages
-
-      # ✅ Post a refresh link to PR or Actions page
-      - name: Post Refresh Link
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const runId = context.runId;
-            const repo = context.repo.repo;
-            const owner = context.repo.owner;
-            const url = `https://github.com/${owner}/${repo}/actions/runs/${runId}`;
-            console.log(`🔄 Click here to refresh: ${url}`);

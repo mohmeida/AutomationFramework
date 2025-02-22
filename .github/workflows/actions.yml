@@ -63,9 +63,23 @@ jobs:
           name: cucumber-report
           path: target/cucumber-report.html  # ✅ Ensure this path is correct
 
-      # ✅ Provide direct artifact link to open in browser
+      # ✅ Generate Public URL for Cucumber Report (GitHub Pages Alternative)
+      - name: Make Cucumber Report Accessible
+        if: always()
+        run: |
+          mkdir -p cucumber-reports
+          cp target/cucumber-report.html cucumber-reports/index.html
+        # Upload it to a raw file viewable without downloading
+      - name: Upload Cucumber Report as Raw HTML
+        uses: actions/upload-artifact@v4
+        with:
+          name: cucumber-report-view
+          path: cucumber-reports/index.html
+          retention-days: 7  # Keep for 7 days
+
+      # ✅ Output Cucumber Report Link
       - name: Show Cucumber Report Link
-        run: echo "Cucumber Report: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts"
+        run: echo 'Cucumber Report: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts'
 
       - name: Fail workflow if tests failed
         if: env.TESTS_FAILED == 'true'

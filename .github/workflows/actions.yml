@@ -48,12 +48,13 @@ jobs:
         run: |
           ./gradlew clean test --info || echo "TESTS_FAILED=true" >> $GITHUB_ENV
 
-      - name: Upload Cucumber Reports (Always run)
+      - name: Upload Cucumber Reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
-           name: cucumber-reports
-           path: target/*
+           name: cucumber-report
+           path: target/cucumber-report.html  # ✅ Match the local path
+           if-no-files-found: warn  # ✅ Prevents failure if the file is missing
 
       - name: Fail workflow if tests failed
         if: env.TESTS_FAILED == 'true'

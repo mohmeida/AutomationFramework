@@ -16,9 +16,6 @@ jobs:
 
     if: github.ref == 'refs/heads/master'  
 
-    outputs:
-      tests_failed: ${{ steps.set-test-status.outputs.tests_failed }}  # ✅ Set output for test failure tracking
-
     steps:
       - name: Checkout code (Ensure latest commit)
         uses: actions/checkout@v3
@@ -53,13 +50,9 @@ jobs:
         continue-on-error: true  # ✅ Allow the workflow to continue even if tests fail
 
       - name: Capture test failure status
-        id: set-test-status  # ✅ Step to set output based on test failure
         run: |
           if [ "${{ steps.run-tests.outcome }}" == "failure" ]; then
-            echo "tests_failed=true" >> $GITHUB_ENV
-            echo "tests_failed=true" >> $GITHUB_OUTPUT  # ✅ Store it as output
-          else
-            echo "tests_failed=false" >> $GITHUB_OUTPUT
+            echo "TESTS_FAILED=true" >> $GITHUB_ENV
           fi
 
       - name: Upload Cucumber Reports
@@ -70,5 +63,5 @@ jobs:
           path: target/cucumber-report.html  # ✅ Ensure this path is correct
 
       - name: Fail workflow if tests failed
-        if: ${{ needs.build.outputs.tests_failed == 'true' }}  # ✅ Correctly check output
+        if: env.TESTS_FAILED == 'true'  # ✅ Directly check the environment variable
         run: exit 1

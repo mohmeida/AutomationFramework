@@ -9,6 +9,3 @@ Feature: Login to System
       | useremail | user_id         |
       | password  | portal_password |
     When verifies user was able to successfully login
-
-
-

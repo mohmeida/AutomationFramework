@@ -79,7 +79,7 @@ jobs:
 
       # ✅ Output Cucumber Report Link
       - name: Show Cucumber Report Link
-        run: echo 'Cucumber Report: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts'
+        run: echo "Cucumber Report:https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts"
 
       - name: Fail workflow if tests failed
         if: env.TESTS_FAILED == 'true'

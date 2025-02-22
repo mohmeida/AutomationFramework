@@ -13,7 +13,6 @@ import static util.RetryUtils.doWithRetry;
 public class LoginStep {
 
     protected LoginPage loginPage;
-    protected BaseTest baseTest;
 
     public LoginStep() {
         loginPage = new LoginPage();

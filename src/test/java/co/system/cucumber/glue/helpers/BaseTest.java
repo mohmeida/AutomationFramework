@@ -37,7 +37,7 @@ public class BaseTest {
     public BaseTest() {
     }
 
-    public static WebDriver initializeDriver() throws IOException {
+    public static void initializeDriver() throws IOException {
         Properties prop = new Properties();
         FileInputStream fis = new FileInputStream(System.getProperty("user.dir")
                 + "//src//test//resources//" + System.getenv("QA_ENV") + ".properties");
@@ -67,7 +67,6 @@ public class BaseTest {
 
         driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
         driver.manage().window().maximize();
-        return driver;
     }
 
     public static String resolveData(String key) {

@@ -44,17 +44,16 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew clean build --no-daemon
 
-      - name: Run tests (Capture failure)
+      - name: Run tests
         run: |
-          ./gradlew clean test --info || echo "TESTS_FAILED=true" >> $GITHUB_ENV
+          ./gradlew clean test --info --fail-fast --no-build-cache --rerun-tasks || echo "TESTS_FAILED=true" >> $GITHUB_ENV
 
       - name: Upload Cucumber Reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
-           name: cucumber-report
-           path: target/cucumber-report.html  # ✅ Match the local path
-           if-no-files-found: warn  # ✅ Prevents failure if the file is missing
+          name: cucumber-report
+          path: target/cucumber-report.html  # Ensure this is the correct path
 
       - name: Fail workflow if tests failed
         if: env.TESTS_FAILED == 'true'

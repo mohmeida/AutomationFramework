@@ -40,18 +40,10 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew clean build --no-daemon
 
-      # ✅ Ensure test failures do NOT stop report generation
+      # ✅ Run tests but capture exit status
       - name: Run tests
         run: |
-          ./gradlew clean test --fail-fast --info || echo "⚠️ Tests failed, but continuing to generate reports."
-
-      # ✅ Upload screenshots (if tests fail)
-      - name: Upload screenshots (if any)
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: screenshots
-          path: screenshots
+          ./gradlew clean test --info || echo "TESTS_FAILED=true" >> $GITHUB_ENV
 
       # ✅ Always generate and upload Cucumber reports (even if tests fail)
       - name: Upload Cucumber Reports
@@ -60,6 +52,11 @@ jobs:
         with:
            name: cucumber-reports
            path: target/*
+
+      # ✅ Manually fail workflow if tests failed
+      - name: Fail workflow if tests failed
+        if: env.TESTS_FAILED == 'true'
+        run: exit 1
 
       # ✅ Deploy Cucumber report to GitHub Pages (only if build succeeds)
       - name: Deploy to GitHub Pages

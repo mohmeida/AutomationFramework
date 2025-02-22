@@ -44,14 +44,13 @@ jobs:
         run: ./gradlew clean build --no-daemon
 
       - name: Run tests
-        id: run-tests  # ✅ Assign an ID to reference later
         run: |
           ./gradlew clean test --info --fail-fast --no-build-cache --rerun-tasks
-        continue-on-error: true  # ✅ Allow the workflow to continue even if tests fail
+        continue-on-error: true  # ✅ Allow workflow to continue
 
       - name: Capture test failure status
         run: |
-          if [ "${{ steps.run-tests.outcome }}" == "failure" ]; then
+          if [ $? -ne 0 ]; then
             echo "TESTS_FAILED=true" >> $GITHUB_ENV
           fi
 

@@ -30,47 +30,22 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      # Build the project with Gradle
+      # ✅ Cache Gradle dependencies (Improves speed)
+      - name: Cache Gradle packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.gradle/caches
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      # ✅ Build the project with Gradle
       - name: Build with Gradle
-        run: ./gradlew clean build
+        run: ./gradlew clean build --no-daemon
 
-      # Run the tests with detailed logs
+      # ✅ Run the tests & fail on first failure
       - name: Run tests
-        run: ./gradlew clean test --info
-        continue-on-error: false  
-
-      # Upload screenshots (if tests fail)
-      - name: Upload screenshots (if any)
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: screenshots
-          path: screenshots
-
-      # Upload Cucumber test reports
-      - name: Upload Cucumber Reports
-        uses: actions/upload-artifact@v4
-        with:
-           name: cucumber-reports
-           path: target/*
-
-      # Deploy Cucumber report to GitHub Pages
-      - name: Deploy to GitHub Pages
-        if: success()
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./target
-          publish_branch: gh-pages
-
-      # Post a refresh link to the PR or Actions page
-      - name: Post Refresh Link
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const runId = context.runId;
-            const repo = context.repo.repo;
-            const owner = context.repo.owner;
-            const url = `https://github.com/${owner}/${repo}/actions/runs/${runId}`;
-            console.log(`🔄 Click here to refresh: ${url}`);
+        run: |
+          ./gradlew clean test --fail-fast --info
+          if [ $? -ne 0 ]; then
+            echo "❌ Tests failed! Failing the build

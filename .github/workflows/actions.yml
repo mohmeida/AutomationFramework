@@ -1,4 +1,4 @@
-name: Regression Workflow
+name: Regression Workflow  # ✅ Name remains unchanged
 
 on:
   workflow_dispatch:  # ✅ Allows manual trigger

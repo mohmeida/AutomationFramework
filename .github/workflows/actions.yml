@@ -1,7 +1,9 @@
 name: Regression Workflow
 
 on:
-  workflow_dispatch:  # ✅ Only runs manually
+  workflow_dispatch:  # ✅ Allows manual trigger
+  schedule:
+    - cron: '0 6 * * *'  # ✅ Runs at 6 AM UTC daily
 
 permissions:
   actions: read
@@ -12,7 +14,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    # ✅ Only run this job if the branch is master
+    # ✅ Ensure this job only runs on master branch
     if: github.ref == 'refs/heads/master'  
 
     steps:

@@ -22,7 +22,6 @@ jobs:
         with:
           fetch-depth: 0  # ✅ Ensure full history is pulled
 
-      # ✅ Debug: Confirm correct branch and latest commit
       - name: Verify branch and latest commit
         run: |
           git branch
@@ -47,14 +46,17 @@ jobs:
       - name: Run tests
         run: |
           ./gradlew clean test --info --fail-fast --no-build-cache --rerun-tasks || echo "TESTS_FAILED=true" >> $GITHUB_ENV
+        continue-on-error: true  # ✅ Allow workflow to continue even if tests fail
 
       - name: Upload Cucumber Reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: cucumber-report
-          path: target/cucumber-report.html  # Ensure this is the correct path
+          path: target/cucumber-report.html  # ✅ Ensure this path is correct
 
       - name: Fail workflow if tests failed
         if: env.TESTS_FAILED == 'true'
+        env:
+          TESTS_FAILED: ${{ env.TESTS_FAILED }}  # ✅ Expose the variable correctly
         run: exit 1

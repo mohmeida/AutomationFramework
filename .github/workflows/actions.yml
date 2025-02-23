@@ -49,8 +49,8 @@ jobs:
       - name: Run tests
         id: run-tests  # ✅ Assign an ID to reference later
         run: |
-          ./gradlew clean test --info --fail-fast --no-build-cache --rerun-tasks || echo "TESTS_FAILED=true" >> $GITHUB_ENV
-        continue-on-error: true  # ✅ Allow workflow to continue
+         ./gradlew clean test --info --fail-fast --no-build-cache --rerun-tasks || echo "TESTS_FAILED=true" >> $GITHUB_ENV
+        continue-on-error: false
 
       - name: Debug test failure flag
         run: echo "TESTS_FAILED is set to $TESTS_FAILED"

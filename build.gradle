@@ -20,9 +20,9 @@ dependencies {
 
     // Others
     implementation("com.google.guava:guava:31.0.1-jre")
-    implementation("org.seleniumhq.selenium:selenium-java:4.4.0")
+    implementation("org.seleniumhq.selenium:selenium-java:4.18.1")
+    implementation("org.seleniumhq.selenium:selenium-chrome-driver:4.18.1")
     implementation("io.github.bonigarcia:webdrivermanager:5.9.2")
-    implementation("org.seleniumhq.selenium:selenium-chrome-driver:4.9.0")
 
     // Add RestAssured for API testing
     testImplementation("io.rest-assured:rest-assured:5.3.0")
@@ -48,21 +48,22 @@ configurations {
     }
 }
 
-// Ensure the 'runCucumber' task is registered after the configuration is defined
 tasks.register('runCucumber', JavaExec) {
     dependsOn assemble, testClasses
     main = 'io.cucumber.core.cli.Main'
     classpath = configurations.resolvableTestImplementation + sourceSets.main.output + sourceSets.test.output
     args = [
             '--plugin', 'pretty',
-            '--plugin', 'html:target/cucumber-report.html',   // HTML report
-            '--plugin', 'json:target/cucumber.json',          // JSON report
-            '--plugin', 'junit:target/cucumber.xml',          // JUnit XML report for CI/CD
+            '--plugin', 'html:target/cucumber-report.html',
+            '--plugin', 'json:target/cucumber.json',
+            '--plugin', 'junit:target/cucumber.xml',
             '--glue', 'co.system.cucumber.glue',
-            '--tags', '@Run',                                  // Add this line to filter tags
+            '--tags', '@Run',
             'src/test/resources/cucumber/features'
     ]
 
-    // Set environment variables
+    // Ensure test failures stop the process
+    ignoreExitValue = false  // ✅ This ensures Gradle exits with an error if tests fail
+
     environment 'QA_ENV', System.getenv("QA_ENV") ?: 'default'
 }

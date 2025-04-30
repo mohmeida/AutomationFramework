@@ -1,35 +1,28 @@
-name: Regression Workflow  # ✅ Name remains unchanged
+# .github/workflows/regression.yml
+name: Regression Workflow  
 
 on:
-  workflow_dispatch:  # ✅ Allows manual trigger
+  workflow_dispatch:
   schedule:
-    - cron: '0 5 * * *'  # ✅ Runs at 5 AM UTC daily
+    - cron: '0 5 * * *'  # daily at 5 AM UTC
 
 permissions:
   actions: read
   contents: write
   pull-requests: write
+  pages: write        # needed to publish to GitHub Pages
+  id-token: write     # needed by deploy-pages action
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
-    if: github.ref == 'refs/heads/master'  
+    if: github.ref == 'refs/heads/master'
 
     steps:
       - name: Checkout code (Ensure latest commit)
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0  # ✅ Ensure full history is pulled
-
-      - name: Verify branch and latest commit
-        run: |
-          git fetch origin master
-          git checkout master
-          git pull origin master
-          git branch
-          git log -1
-          git status
+          fetch-depth: 0
 
       - name: Set up JDK
         uses: actions/setup-java@v3
@@ -49,36 +42,43 @@ jobs:
       - name: Run tests
         id: run-tests
         run: |
-          set +e  # Allow the script to continue even if tests fail
+          set +e
           ./gradlew clean test --info --fail-fast --no-build-cache --rerun-tasks
           TEST_EXIT_CODE=$?
           echo "TESTS_FAILED=$TEST_EXIT_CODE" >> $GITHUB_ENV
-          exit $TEST_EXIT_CODE  # ✅ Ensures the correct exit code is set for failure detection
+          exit $TEST_EXIT_CODE
 
-      - name: Debug test failure flag
-        run: echo "TESTS_FAILED is set to $TESTS_FAILED"
-
-      # ✅ Upload the Cucumber HTML Report
-      - name: Upload Cucumber Reports
+      - name: Upload Cucumber Reports (artifact)
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: cucumber-report
-          path: target/cucumber-report.html  # ✅ Ensure this path is correct
+          path: target/cucumber-report.html
 
-      # ✅ Upload raw Cucumber Report
-      - name: Upload Cucumber Report as Raw HTML
+      - name: Upload raw Cucumber Report
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: cucumber-report-view
           path: cucumber-reports/index.html
-          retention-days: 7  # Keep for 7 days
+          retention-days: 7
 
-      # ✅ Output Cucumber Report Link
-      - name: Show Cucumber Report Link
-        run: echo "Cucumber Report:https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts"
+      # Publish the HTML folder to GitHub Pages
+      - name: Upload Pages Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: cucumber-reports     # folder containing index.html + assets
+          name: github-pages
+          retention-days: 7       # keep Pages artifact for 7 days
 
-      # ✅ Fail workflow if tests failed
-      - name: Fail workflow if tests failed
-        if: env.TESTS_FAILED != '0'
-        run: exit 1
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deploy
+        uses: actions/deploy-pages@v4
